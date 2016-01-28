@@ -122,15 +122,24 @@ def setup(hass, config):
             _LOGGER.info('%s: no new_state', entity_name)
             
         """========================================================"""
+        device_is_in_zone = False
+        
         #check for devices in the monitored zone
         for device in proximity_devices:
             device_state = hass.states.get(device)
             if device_state.state == config[DOMAIN]['zone']:
+                device_is_in_zone = True
+        
+        if device_is_in_zone == True:
+            _LOGGER.info('%s Device: %s is in the monitored zone: %s', entity_name, device, device_state.state)        
+            entity_state = hass.states.get(proximity_zone)
+            if not(entity_state.attributes[ATTR_DIR_OF_TRAVEL] == 'arrived'):
                 entity_attributes = {ATTR_DIST_FROM:0, ATTR_DIR_OF_TRAVEL:'arrived', ATTR_NEAREST_DEVICE:'not_applicable', ATTR_HIDDEN: False} 
                 hass.states.set(ENTITY_ID, 0, entity_attributes)
-                _LOGGER.info('%s Device: %s is in the monitored zone: %s', entity_name, device, device_state.state)
                 _LOGGER.info('%s Update entity: distance = 0: direction = arrived: device = not_applicable ', ENTITY_ID)
-                return
+            else:
+                _LOGGER.info('%s Entity not updted: Dir of travel already = arrived', ENTITY_ID)            
+            return
         
         """========================================================"""
         #check that the device is not in an override zone
@@ -232,7 +241,7 @@ def setup(hass, config):
         _LOGGER.info('%s: direction_of_travel: %s', entity_name, direction_of_travel)
             
         entity_attributes = {ATTR_DIST_FROM:distance_from_zone, ATTR_DIR_OF_TRAVEL:direction_of_travel, ATTR_NEAREST_DEVICE:entity_name, ATTR_HIDDEN: False} 
-        hass.states.set(ENTITY_ID, 0, entity_attributes)
+        hass.states.set(ENTITY_ID, distance_from_zone, entity_attributes)
         _LOGGER.info('%s Update entity: distance = %s: direction = %s: device = %s', ENTITY_ID, distance_from_zone, direction_of_travel, entity_name)
         
     """========================================================"""
