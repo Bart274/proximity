@@ -4,9 +4,8 @@ custom_components.proximity
 Component to monitor the proximity of devices to a particular zone. The result is an entity created in HA which maintains the proximity data
 
 Use configuration.yaml to enable the user to easily tune a number of settings:
-- Override States: where proximity is not calculated (e.g. work or school)
+- Override Zones: where proximity is not calculated (e.g. work or school)
 - Devices: a list of devices to compare location against to check closeness to home
-- Default values to control the behavious of the thermostat
 
 Example configuration.yaml entry:
 proximity:
@@ -151,7 +150,6 @@ def setup(hass, config):
         #compare distance with other devices
         #default behaviour
         device_is_closest_to_home = True
-        devices_compared = 0
         
         for device in proximity_devices:
             #ignore the device we're working on
@@ -173,8 +171,6 @@ def setup(hass, config):
             compare_distance_from_zone = round(distance(proximity_latitude, proximity_longitude, device_state.attributes['latitude'], device_state.attributes['longitude'])/1000 ,1)
             _LOGGER.info('%s: compare device %s: co-ordintes: LAT %s: LONG: %s', entity_name, device, device_state.attributes['latitude'], device_state.attributes['longitude'])
 
-            devices_compared = devices_compared + 1
-            
             #compare the distances from home
             if distance_from_zone < compare_distance_from_zone:
                 _LOGGER.info('%s: closer than %s: %s compared with %s', entity_name, device, distance_from_zone, compare_distance_from_zone)
@@ -187,7 +183,7 @@ def setup(hass, config):
          
         """========================================================"""
         #if the device is not the closest to home
-        if device_is_closest_to_home == False and devices_compared > 0:
+        if device_is_closest_to_home == False:
             _LOGGER.info('%s: complete - device is not closest to zone', entity_name)
             return
 
