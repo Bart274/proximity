@@ -4,8 +4,10 @@ custom_components.proximity
 Component to monitor the proximity of devices to a particular zone. The result is an entity created in HA which maintains the proximity data
 
 Use configuration.yaml to enable the user to easily tune a number of settings:
+- Zone: the zone to which this component is measuring the distance to
 - Override Zones: where proximity is not calculated (e.g. work or school)
-- Devices: a list of devices to compare location against to check closeness to home
+- Devices: a list of devices to compare location against to check closeness to the configured zone
+- Tolerance: the tolerance used to calculate the direction of travel in metres
 
 Example configuration.yaml entry:
 proximity:
@@ -84,18 +86,18 @@ def setup(hass, config):
     state = hass.states.get(proximity_zone)
     proximity_latitude = state.attributes.get('latitude')
     proximity_longitude = state.attributes.get('longitude')
-    _LOGGER.info('Home settings: LAT:%s LONG:%s', proximity_latitude, proximity_longitude)
+    _LOGGER.info('Zone settings: LAT:%s LONG:%s', proximity_latitude, proximity_longitude)
 
     """========================================================"""
     #create an entity so that the proximity values can be used for other components
     entities = set()
     
     #set the default values
-    dist_from_home = 'not set'
+    dist_from_zone = 'not set'
     dir_of_travel = 'not set'
     nearest_device = 'not set'
 
-    proximity = Proximity(hass, dist_from_home, dir_of_travel, nearest_device)
+    proximity = Proximity(hass, dist_from_zone, dir_of_travel, nearest_device)
     proximity.entity_id = ENTITY_ID
     
     proximity.update_ha_state()
@@ -149,7 +151,7 @@ def setup(hass, config):
         """========================================================"""  
         #compare distance with other devices
         #default behaviour
-        device_is_closest_to_home = True
+        device_is_closest_to_zone = True
         
         for device in proximity_devices:
             #ignore the device we're working on
@@ -162,28 +164,28 @@ def setup(hass, config):
                 _LOGGER.info('%s: no need to compare with %s - device is in override zone', entity_name, device)
                 continue
 
-            #check that the distance from home can be calculated
+            #check that the distance from the zone can be calculated
             if not('latitude' in device_state.attributes):
                 _LOGGER.info('%s: cannot compare with %s - no location attributes', entity_name, device)
                 continue
 
-            #calculate the distance from home for the compare device
+            #calculate the distance from the zone for the compare device
             compare_distance_from_zone = round(distance(proximity_latitude, proximity_longitude, device_state.attributes['latitude'], device_state.attributes['longitude'])/1000 ,1)
             _LOGGER.info('%s: compare device %s: co-ordintes: LAT %s: LONG: %s', entity_name, device, device_state.attributes['latitude'], device_state.attributes['longitude'])
 
-            #compare the distances from home
+            #compare the distances from the zone
             if distance_from_zone < compare_distance_from_zone:
                 _LOGGER.info('%s: closer than %s: %s compared with %s', entity_name, device, distance_from_zone, compare_distance_from_zone)
             elif distance_from_zone > compare_distance_from_zone:
-                device_is_closest_to_home = False
+                device_is_closest_to_zone = False
                 _LOGGER.info('%s: further away than %s: %s compared with %s', entity_name, device, distance_from_zone, compare_distance_from_zone)
             else:
-                device_is_closest_to_home = False
+                device_is_closest_to_zone = False
                 _LOGGER.info('%s: same distance as %s: %s compared with %s', entity_name, device, distance_from_zone, compare_distance_from_zone)
          
         """========================================================"""
-        #if the device is not the closest to home
-        if device_is_closest_to_home == False:
+        #if the device is not the closest to the zone
+        if device_is_closest_to_zone == False:
             _LOGGER.info('%s: complete - device is not closest to zone', entity_name)
             return
 
@@ -243,9 +245,9 @@ def setup(hass, config):
 class Proximity(Entity):
     """ Represents a Proximity in Home Assistant. """
     # pylint: disable=too-many-arguments
-    def __init__(self, hass, dist_from_home, dir_of_travel, nearest_device):
+    def __init__(self, hass, dist_from_zone, dir_of_travel, nearest_device):
         self.hass = hass
-        self._dist_from = dist_from_home
+        self._dist_from = dist_from_zone
         self._dir_of_travel = dir_of_travel
         self._nearest_device = nearest_device
 
