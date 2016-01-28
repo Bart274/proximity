@@ -122,8 +122,7 @@ def setup(hass, config):
         #default behaviour
         someone_is_home = False
         device_in_override_zone = False
-        device_is_closest_to_home = False
-        devices_compared = 0
+        device_is_closest_to_home = True
         distance_from_zone = 0
         distance_travelled = 0
         direction_of_travel = 'not set'
@@ -166,11 +165,8 @@ def setup(hass, config):
                             _LOGGER.info('%s: compare device %s: co-ordintes: LAT %s: LONG: %s', entity_name, device, device_state.attributes['latitude'], device_state.attributes['longitude'])
                             compare_distance_from_zone = round(distance(proximity_latitude, proximity_longitude, device_state.attributes['latitude'], device_state.attributes['longitude'])/1000 ,1)
 
-							devices_compared = devices_compared + 1
-
                             #compare the distances from home
                             if distance_from_zone < compare_distance_from_zone:
-                                device_is_closest_to_home = True
                                 _LOGGER.info('%s: closer than %s: %s compared with %s', entity_name, device, distance_from_zone, compare_distance_from_zone)
                             elif distance_from_zone > compare_distance_from_zone:
                                 device_is_closest_to_home = False
@@ -184,7 +180,7 @@ def setup(hass, config):
                         _LOGGER.info('%s: no need to compare with %s - device is in override zone', entity_name, device)
             
             #if the device is the closest to home continue to calculate direction of travel
-            if device_is_closest_to_home == True or devices_compared == 0:
+            if device_is_closest_to_home == True:
                 #reset the variables
                 old_latitude = None
                 old_longitude = None
