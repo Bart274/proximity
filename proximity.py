@@ -232,7 +232,7 @@ def setup(hass, config):
         _LOGGER.info('%s: direction_of_travel: %s', entity_name, direction_of_travel)
             
         entity_attributes = {ATTR_DIST_FROM:distance_from_zone, ATTR_DIR_OF_TRAVEL:direction_of_travel, ATTR_NEAREST_DEVICE:entity_name, ATTR_HIDDEN: False} 
-        hass.states.set(ENTITY_ID, distance_from_zone, entity_attributes)
+        hass.states.set(ENTITY_ID, 0, entity_attributes)
         _LOGGER.info('%s Update entity: distance = %s: direction = %s: device = %s', ENTITY_ID, distance_from_zone, direction_of_travel, entity_name)
         
     """========================================================"""
