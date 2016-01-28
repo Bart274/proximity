@@ -224,7 +224,6 @@ def setup(hass, config):
         _LOGGER.info('%s: someone_is_home: %s', entity_name, someone_is_home)
         _LOGGER.info('%s: device_in_override_zone: %s', entity_name, device_in_override_zone)
         _LOGGER.info('%s: device_is_closest_to_home: %s', entity_name, device_is_closest_to_home)
-        _LOGGER.info('%s: devices_compared: %s', entity_name, devices_compared)
         _LOGGER.info('%s: distance_from_zone: %s', entity_name, distance_from_zone)
         _LOGGER.info('%s: distance_travelled: %s', entity_name, distance_travelled)
         _LOGGER.info('%s: direction_of_travel: %s', entity_name, direction_of_travel)
@@ -233,14 +232,10 @@ def setup(hass, config):
             entity_attributes = {ATTR_DIST_FROM:0, ATTR_DIR_OF_TRAVEL:'arrived', ATTR_NEAREST_DEVICE:'not_applicable', ATTR_HIDDEN: False} 
             hass.states.set(ENTITY_ID, 0, entity_attributes)
             _LOGGER.info('%s Update entity: distance = 0: direction = arrived: device = not_applicable ', ENTITY_ID)
-        elif not(someone_is_home) and not(device_in_override_zone)and devices_compared == 0:
+        elif not(someone_is_home) and not(device_in_override_zone)and device_is_closest_to_home:
             entity_attributes = {ATTR_DIST_FROM:distance_from_zone, ATTR_DIR_OF_TRAVEL:direction_of_travel, ATTR_NEAREST_DEVICE:entity_name, ATTR_HIDDEN: False} 
             hass.states.set(ENTITY_ID, distance_from_zone, entity_attributes)
             _LOGGER.info('%s Update entity: distance = %s: direction = %s: device = %s ', ENTITY_ID, distance_from_zone, direction_of_travel, entity_name)            
-        elif device_is_closest_to_home:
-            entity_attributes = {ATTR_DIST_FROM:distance_from_zone, ATTR_DIR_OF_TRAVEL:direction_of_travel, ATTR_NEAREST_DEVICE:entity_name, ATTR_HIDDEN: False} 
-            hass.states.set(ENTITY_ID, distance_from_zone, entity_attributes)
-            _LOGGER.info('%s Update entity: distance = %s: direction = %s: device = %s ', ENTITY_ID, distance_from_zone, direction_of_travel, entity_name)
         else:
             _LOGGER.info('%s Update entity: not updated', entity_name)
         
